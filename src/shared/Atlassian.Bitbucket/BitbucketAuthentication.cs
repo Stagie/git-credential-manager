@@ -90,9 +90,15 @@ namespace Atlassian.Bitbucket
             }
 
             // Shell out to the UI helper and show the Bitbucket u/p prompt
-            if (Context.SessionManager.IsDesktopSession && TryFindHelperExecutablePath(out string helperPath))
+            if (Context.Settings.IsGuiPromptsEnabled && Context.SessionManager.IsDesktopSession &&
+                TryFindHelperExecutablePath(out string helperPath))
             {
                 var cmdArgs = new StringBuilder("userpass");
+                if (!BitbucketHostProvider.IsBitbucketOrg(targetUri))
+                {
+                    cmdArgs.AppendFormat(" --url {0}", QuoteCmdArg(targetUri.ToString()));
+                }
+
                 if (!string.IsNullOrWhiteSpace(userName))
                 {
                     cmdArgs.AppendFormat(" --username {0}", QuoteCmdArg(userName));
@@ -186,7 +192,8 @@ namespace Atlassian.Bitbucket
             ThrowIfUserInteractionDisabled();
 
             // Shell out to the UI helper and show the Bitbucket prompt
-            if (Context.SessionManager.IsDesktopSession && TryFindHelperExecutablePath(out string helperPath))
+            if (Context.Settings.IsGuiPromptsEnabled && Context.SessionManager.IsDesktopSession &&
+                TryFindHelperExecutablePath(out string helperPath))
             {
                 IDictionary<string, string> output = await InvokeHelperAsync(helperPath, "oauth");
 
@@ -238,7 +245,7 @@ namespace Atlassian.Bitbucket
 
         #region Private Methods
 
-        private bool TryFindHelperExecutablePath(out string path)
+        protected internal virtual bool TryFindHelperExecutablePath(out string path)
         {
             return TryFindHelperExecutablePath(
                 BitbucketConstants.EnvironmentVariables.AuthenticationHelper,
