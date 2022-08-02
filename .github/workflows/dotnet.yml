@@ -1,22 +1,23 @@
 name: .NET
 
 on:
-  push:
+  push:Stagie-patch-1
     branches: [ main ]
   pull_request:
     branches: [ main ]
+=======
+    branches: [ "main" ]
+  pull_request:
+  
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
